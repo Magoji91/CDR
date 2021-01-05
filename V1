@@ -1,0 +1,60 @@
+##load data
+getwd()
+setwd("/Users/smsanda/Documents/")
+library(readxl)
+AIT <- read_excel("AIT.xlsx", sheet = "Plan1")
+
+## app.R ##
+library(shinydashboard)
+library(shiny)
+library(threejs)
+
+options(shiny.launch.browser=F, shiny.minified=F, shiny.port = 4601)
+
+ui <- function(request) {
+  dashboardPage(
+    dashboardHeader(title = "Testing dynamic sidebar bookmarking"),
+    dashboardSidebar(
+      uiOutput("sidebarControls"),
+      sidebarMenuOutput("menu")
+    ),
+    dashboardBody(
+      tabItems(
+        tabItem("front",
+                h3("Click through the different tabs to see different content")
+        ),
+              tabItem("tables",
+                h3("Here's a table"),
+                tableOutput("tbl")
+        )
+      )
+    )
+  )
+}
+
+
+server <- function(input, output, session) {
+  output$menu <- renderMenu({
+    sidebarMenu(id = "smenu",
+                menuItem("Frontpage", tabName = "front"),
+                                menuItem("Tables", tabName = "tables")
+    )
+  })
+
+    
+  output$tbl <- renderTable({
+    AIT
+  })
+  
+  observe({
+    reactiveValuesToList(input)
+    session$doBookmark()
+  })
+  onBookmarked(function(url) {
+    updateQueryString(url)
+  })
+  
+}
+
+enableBookmarking("url")
+shinyApp(ui, server)
