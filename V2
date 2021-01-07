@@ -1,0 +1,38 @@
+#load data
+getwd()
+setwd("/Users/smsanda/Documents/")
+
+library(flexdashboard) # Flexdashboard to create a frame for the content
+library(dplyr)         # tidy data manipulation
+library(DT)            # DT for the interactive table
+library(shiny)         # Shiny web app to broaden the capabilities of Crosstalk
+
+# Ion icons and Font Awesome for icons
+
+# user interface just shows the table
+ui <-
+  fluidPage(
+    title = 'Base List Table',
+    h1('AIT INCONSISTENTE'),
+    fluidRow(column(2, div(
+      #TODO:  FIX COLUMNS TO DISPLAY 1       
+      dataTableOutput("dataTable")
+    ))))
+
+# server is where all calculations are done, tables are pre-rendered
+server <- function(input, output, session) {
+  library(readxl)
+  AIT <- read_excel("AIT.xls", sheet = "Fornecedores")
+  
+  output$dataTable <- renderDT(AIT,
+                               # data
+                               class = "display nowrap compact",
+                               # style
+                               filter = "top",
+                               # location of column filters
+                               editable = TRUE)
+  # cells editable
+}
+
+# run the app
+shinyApp(ui, server)
